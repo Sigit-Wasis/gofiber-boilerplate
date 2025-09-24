@@ -25,6 +25,9 @@ go-fiber-postgres-boilerplate/
 │   │   └── health.go
 │   └── seed/
 │       └── seeder.go
+├── cmd/
+│   └── seed/
+│       └── main.go
 ├── migrations/
 │   ├── 000001_create_users_table.up.sql
 │   ├── 000001_create_users_table.down.sql
