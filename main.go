@@ -4,8 +4,8 @@ import (
 	"log"
 
 	_ "github.com/Sigit-Wasis/gofiber-boilerplate/docs"
-	"github.com/gofiber/contrib/swagger"
 	"github.com/gofiber/fiber/v2"
+	fiberSwagger "github.com/swaggo/fiber-swagger"
 
 	"github.com/Sigit-Wasis/gofiber-boilerplate/internal/config"
 	"github.com/Sigit-Wasis/gofiber-boilerplate/internal/db"
@@ -18,30 +18,28 @@ import (
 // @host localhost:8080
 // @BasePath /
 func main() {
-cfg := config.Load()
+	cfg := config.Load()
 
+	// init db
+	if err := db.Init(cfg.DatabaseURL); err != nil {
+		log.Fatalf("failed to init db: %v", err)
+	}
+	defer db.Close()
 
-// init db
-if err := db.Init(cfg.DatabaseURL); err != nil {
-log.Fatalf("failed to init db: %v", err)
-}
-defer db.Close()
+	app := fiber.New()
 
+	app.Static("/docs", "./docs")
 
-app := fiber.New()
+	// routes
+	router.Setup(app)
 
+	// swagger route
+	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
-// routes
-router.Setup(app)
+	addr := ":" + cfg.AppPort
+	log.Printf("listening on %s", addr)
 
-
-// swagger route
-app.Get("/swagger/*", swagger.New())
-
-
-addr := ":" + cfg.AppPort
-log.Printf("listening on %s", addr)
-if err := app.Listen(addr); err != nil {
-log.Fatalf("listen error: %v", err)
-}
+	if err := app.Listen(addr); err != nil {
+		log.Fatalf("listen error: %v", err)
+	}
 }
