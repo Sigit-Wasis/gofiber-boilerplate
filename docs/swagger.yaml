@@ -1,0 +1,22 @@
+basePath: /
+host: localhost:8080
+info:
+  contact: {}
+  description: Boilerplate API with Fiber, Postgres (sql), migrations, seeders, and
+    Swagger
+  title: Go Fiber Postgres Boilerplate API
+  version: "1.0"
+paths:
+  /api/health:
+    get:
+      description: get health status
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - health
+swagger: "2.0"
