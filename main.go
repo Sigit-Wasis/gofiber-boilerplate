@@ -5,6 +5,7 @@ import (
 
 	_ "github.com/Sigit-Wasis/gofiber-boilerplate/docs"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	fiberSwagger "github.com/swaggo/fiber-swagger"
 
 	"github.com/Sigit-Wasis/gofiber-boilerplate/internal/config"
@@ -28,13 +29,20 @@ func main() {
 
 	app := fiber.New()
 
+	// enable CORS for Swagger UI
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*", // ubah ke origin spesifik kalau mau lebih aman
+		AllowMethods: "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
+	}))
+
+	// serve docs as static
 	app.Static("/docs", "./docs")
 
-	// routes
-	router.Setup(app)
-
-	// swagger route
+	// swagger UI
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
+
+	// routes
+	router.SetupRoutes(app, db.GetDB())
 
 	addr := ":" + cfg.AppPort
 	log.Printf("listening on %s", addr)

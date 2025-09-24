@@ -2,34 +2,27 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 
 	_ "github.com/lib/pq"
 )
 
-
-var conn *sql.DB
-
+var DB *sql.DB
 
 func Init(databaseURL string) error {
-var err error
-conn, err = sql.Open("postgres", databaseURL)
-if err != nil {
-return err
-}
-if err := conn.Ping(); err != nil {
-return fmt.Errorf("db ping: %w", err)
-}
-return nil
+	var err error
+	DB, err = sql.Open("postgres", databaseURL)
+	if err != nil {
+		return err
+	}
+	return DB.Ping()
 }
 
-
-func Get() *sql.DB { return conn }
-
-
-func Close() error {
-if conn == nil {
-return nil
+func Close() {
+	if DB != nil {
+		DB.Close()
+	}
 }
-return conn.Close()
+
+func GetDB() *sql.DB {
+	return DB
 }

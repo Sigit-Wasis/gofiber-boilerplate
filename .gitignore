@@ -1,0 +1,34 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Build
+/bin/
+/dist/
+/build/
+
+# Go
+*.log
+*.tmp
+*.swp
+*.swo
+*.db
+*.sql
+*.sqlite
+*.sqlite3
+*.dump
+
+# Dependency directories
+vendor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
