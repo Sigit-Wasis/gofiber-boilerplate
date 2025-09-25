@@ -18,6 +18,11 @@ import (
 // @description Boilerplate API with Fiber, Postgres (sql), migrations, seeders, and Swagger
 // @host localhost:8080
 // @BasePath /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Type "Bearer {your JWT token}" to authenticate requests
 func main() {
 	cfg := config.Load()
 

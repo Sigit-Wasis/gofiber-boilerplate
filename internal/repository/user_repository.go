@@ -40,7 +40,7 @@ func (r *UserRepository) GetByID(ctx context.Context, id int) (*models.User, err
 	).Scan(&u.ID, &u.Name, &u.Email, &u.CreatedAt, &u.UpdatedAt)
 
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, nil	
 	}
 	return &u, err
 }
@@ -63,4 +63,19 @@ func (r *UserRepository) Update(ctx context.Context, user *models.User) error {
 func (r *UserRepository) Delete(ctx context.Context, id int) error {
 	_, err := r.DB.ExecContext(ctx, "DELETE FROM users WHERE id=$1", id)
 	return err
+}
+
+func (r *UserRepository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+	query := "SELECT id, name, email, password_hash FROM users WHERE email = $1"
+	row := r.DB.QueryRowContext(ctx, query, email)
+
+	var u models.User
+	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.PasswordHash)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &u, nil
 }

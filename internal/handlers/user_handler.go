@@ -26,7 +26,8 @@ func NewUserHandler(db *sql.DB) *UserHandler {
 // @Produce  json
 // @Success 200 {array} models.User
 // @Failure 500 {object} map[string]string
-// @Router /users [get]
+// @Security BearerAuth
+// @Router /api/users [get]
 func (h *UserHandler) GetUsers(c *fiber.Ctx) error {
 	users, err := h.Repo.GetAll(c.Context())
 	if err != nil {
@@ -45,7 +46,8 @@ func (h *UserHandler) GetUsers(c *fiber.Ctx) error {
 // @Success 200 {object} models.User
 // @Failure 404 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /users/{id} [get]
+// @Security BearerAuth
+// @Router /api/users/{id} [get]
 func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	user, err := h.Repo.GetByID(c.Context(), id)
@@ -68,7 +70,8 @@ func (h *UserHandler) GetUser(c *fiber.Ctx) error {
 // @Success 201 {object} models.User
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /users [post]
+// @Security BearerAuth
+// @Router /api/users [post]
 func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 	var u models.User
 	if err := c.BodyParser(&u); err != nil {
@@ -91,7 +94,8 @@ func (h *UserHandler) CreateUser(c *fiber.Ctx) error {
 // @Success 200 {object} models.User
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /users/{id} [put]
+// @Security BearerAuth
+// @Router /api/users/{id} [put]
 func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	var u models.User
@@ -114,7 +118,8 @@ func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
 // @Param id path int true "User ID"
 // @Success 204
 // @Failure 500 {object} map[string]string
-// @Router /users/{id} [delete]
+// @Security BearerAuth
+// @Router /api/users/{id} [delete]
 func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
 	id, _ := strconv.Atoi(c.Params("id"))
 	if err := h.Repo.Delete(c.Context(), id); err != nil {
