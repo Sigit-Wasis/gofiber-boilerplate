@@ -47,8 +47,8 @@ func (r *UserRepository) GetByID(ctx context.Context, id int) (*models.User, err
 
 func (r *UserRepository) Create(ctx context.Context, user *models.User) error {
 	return r.DB.QueryRowContext(ctx,
-		"INSERT INTO users (name, email) VALUES ($1, $2) RETURNING id, created_at, updated_at",
-		user.Name, user.Email,
+		"INSERT INTO users (name, email, password_hash) VALUES ($1, $2, $3) RETURNING id, created_at, updated_at",
+		user.Name, user.Email, user.PasswordHash,
 	).Scan(&user.ID, &user.CreatedAt, &user.UpdatedAt)
 }
 

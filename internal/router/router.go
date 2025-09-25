@@ -5,15 +5,11 @@ import (
 
 	"github.com/Sigit-Wasis/gofiber-boilerplate/internal/handlers"
 	"github.com/Sigit-Wasis/gofiber-boilerplate/internal/middleware"
+	"github.com/Sigit-Wasis/gofiber-boilerplate/internal/utils"
 	"github.com/gofiber/fiber/v2"
 )
 
 func SetupRoutes(app *fiber.App, db *sql.DB) {
-	// Health check (public)
-	app.Get("/health", func(c *fiber.Ctx) error {
-		return c.JSON(fiber.Map{"status": "ok"})
-	})
-
 	// Auth routes (public)
 	authHandler := handlers.NewAuthHandler(db)
 	app.Post("/register", authHandler.Register)
@@ -33,8 +29,7 @@ func SetupRoutes(app *fiber.App, db *sql.DB) {
 	// Example protected profile
 	api.Get("/profile", func(c *fiber.Ctx) error {
 		userID := c.Locals("user_id")
-		return c.JSON(fiber.Map{
-			"message": "Welcome to your profile",
+		return utils.Success(c, fiber.StatusOK, "Welcome to your profile", fiber.Map{
 			"user_id": userID,
 		})
 	})

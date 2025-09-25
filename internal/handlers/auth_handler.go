@@ -6,13 +6,14 @@ import (
 
 	"github.com/Sigit-Wasis/gofiber-boilerplate/internal/models"
 	"github.com/Sigit-Wasis/gofiber-boilerplate/internal/repository"
+	"github.com/Sigit-Wasis/gofiber-boilerplate/internal/utils"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var jwtSecret = []byte("SUPER_SECRET_KEY") // sebaiknya dari ENV
+var jwtSecret = []byte("SUPER_SECRET_KEY") // TODO: ambil dari ENV
 
 type AuthHandler struct {
 	Repo *repository.UserRepository
@@ -29,18 +30,21 @@ func NewAuthHandler(db *sql.DB) *AuthHandler {
 // @Accept json
 // @Produce json
 // @Param body body models.RegisterRequest true "Register request"
-// @Success 201 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 500 {object} map[string]string
+// @Success 201 {object} utils.Response
+// @Failure 400 {object} utils.Response
+// @Failure 500 {object} utils.Response
 // @Router /register [post]
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var body models.RegisterRequest
 	if err := c.BodyParser(&body); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
+		return utils.Error(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
 	}
 
 	// Hash password
-	hash, _ := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
+	hash, err := bcrypt.GenerateFromPassword([]byte(body.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return utils.Error(c, fiber.StatusInternalServerError, "Failed to hash password", err.Error())
+	}
 
 	user := models.User{
 		Name:         body.Name,
@@ -49,10 +53,14 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	}
 
 	if err := h.Repo.Create(c.Context(), &user); err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": err.Error()})
+		return utils.Error(c, fiber.StatusInternalServerError, "Failed to create user", err.Error())
 	}
 
-	return c.Status(201).JSON(fiber.Map{"message": "user created"})
+	return utils.Success(c, fiber.StatusCreated, "User created successfully", fiber.Map{
+		"id":    user.ID,
+		"name":  user.Name,
+		"email": user.Email,
+	})
 }
 
 // Login godoc
@@ -62,24 +70,24 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 // @Accept json
 // @Produce json
 // @Param body body models.LoginRequest true "Login request"
-// @Success 200 {object} map[string]string
-// @Failure 400 {object} map[string]string
-// @Failure 401 {object} map[string]string
+// @Success 200 {object} utils.Response
+// @Failure 400 {object} utils.Response
+// @Failure 401 {object} utils.Response
 // @Router /login [post]
 func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	var body models.LoginRequest
 	if err := c.BodyParser(&body); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": err.Error()})
+		return utils.Error(c, fiber.StatusBadRequest, "Invalid request body", err.Error())
 	}
 
 	user, err := h.Repo.GetByEmail(c.Context(), body.Email)
 	if err != nil || user == nil {
-		return c.Status(401).JSON(fiber.Map{"error": "invalid credentials Email"})
+		return utils.Error(c, fiber.StatusUnauthorized, "Invalid credentials", "email not found")
 	}
 
 	// Compare password
 	if bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(body.Password)) != nil {
-		return c.Status(401).JSON(fiber.Map{"error": "invalid credentials Password"})
+		return utils.Error(c, fiber.StatusUnauthorized, "Invalid credentials", "wrong password")
 	}
 
 	// Generate JWT
@@ -88,7 +96,12 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signed, _ := token.SignedString(jwtSecret)
+	signed, err := token.SignedString(jwtSecret)
+	if err != nil {
+		return utils.Error(c, fiber.StatusInternalServerError, "Failed to generate token", err.Error())
+	}
 
-	return c.JSON(fiber.Map{"token": signed})
+	return utils.Success(c, fiber.StatusOK, "Login successful", fiber.Map{
+		"token": signed,
+	})
 }

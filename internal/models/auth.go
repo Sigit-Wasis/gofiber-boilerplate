@@ -10,6 +10,6 @@ type RegisterRequest struct {
 
 // LoginRequest is the payload for logging in a user
 type LoginRequest struct {
-	Email    string `json:"email" example:"admin@example.com"`
-	Password string `json:"password" example:"admin123"`
+	Email    string `json:"email" db:"email" example:"admin@example.com"`
+	Password string `json:"password" db:"password_hash" example:"admin123"`
 }

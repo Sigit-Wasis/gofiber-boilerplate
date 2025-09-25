@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -14,6 +15,11 @@ func Init(databaseURL string) error {
 	if err != nil {
 		return err
 	}
+
+	DB.SetMaxOpenConns(20)
+    DB.SetMaxIdleConns(5)
+    DB.SetConnMaxLifetime(time.Hour)
+	
 	return DB.Ping()
 }
 
