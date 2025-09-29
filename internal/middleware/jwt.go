@@ -5,7 +5,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var JwtSecret = []byte("SUPER_SECRET_KEY")
+var JWT_SECRET = []byte("SUPER_SECRET_KEY")
 
 func Protected() fiber.Handler {
 	return func(c *fiber.Ctx) error {
@@ -14,15 +14,26 @@ func Protected() fiber.Handler {
 			return c.Status(401).JSON(fiber.Map{"error": "missing token"})
 		}
 
-		token, err := jwt.Parse(auth, func(token *jwt.Token) (interface{}, error) {
-			return JwtSecret, nil
+		const bearerPrefix = "Bearer "
+		if len(auth) > len(bearerPrefix) && auth[:len(bearerPrefix)] == bearerPrefix {
+			auth = auth[len(bearerPrefix):]
+		}
+
+		token, err := jwt.Parse(auth, func(token *jwt.Token) (any, error) {
+			return JWT_SECRET, nil
 		})
 		if err != nil || !token.Valid {
 			return c.Status(401).JSON(fiber.Map{"error": "invalid token"})
 		}
 
-		claims := token.Claims.(jwt.MapClaims)
-		c.Locals("user_id", claims["user_id"])
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			return c.Status(401).JSON(fiber.Map{"error": "invalid token claims"})
+		}
+
+		if userID, ok := claims["user_id"]; ok {
+			c.Locals("user_id", userID)
+		}
 
 		return c.Next()
 	}

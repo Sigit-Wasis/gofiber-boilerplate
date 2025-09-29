@@ -6,12 +6,14 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.9
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/lib/pq v1.10.9
+	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/swag v1.16.6
 	golang.org/x/crypto v0.32.0
 )
 
 require (
-	github.com/stretchr/testify v1.8.4 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe // indirect
 	golang.org/x/net v0.34.0 // indirect
 )
